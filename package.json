@@ -1,0 +1,19 @@
+{
+  "name": "faithson-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend Node.js (Express) + PostgreSQL pour Faithson Custom. Gestion des produits.",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:init": "node scripts/init-db.js",
+    "db:reset": "node scripts/init-db.js --reset"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
