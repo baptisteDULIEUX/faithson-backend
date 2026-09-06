@@ -2,9 +2,10 @@ import express from 'express'
 import cors from 'cors'
 import { config } from './config.js'
 import productsRouter from './routes/products.routes.js'
+import Stripe from 'stripe'
 
 const app = express()
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 // CORS : autorise le frontend (origine(s) définie(s) dans .env)
 app.use(
   cors({
@@ -25,6 +26,31 @@ app.get('/api/health', (req, res) => res.json({ ok: true, service: 'faithson-bac
 // routes métier (montées sous /api pour coller à VITE_API_URL du frontend)
 app.use('/api', productsRouter)
 
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: req.body.items,
+      mode: 'payment',
+      // CORRECTION 3 : Utilisation des données client
+      customer_email: req.body.customer.email,
+      metadata: {
+        prenom: req.body.customer.prenom,
+        nom: req.body.customer.nom,
+        adresse: req.body.shipping.adresse,
+        cp: req.body.shipping.cp,
+        ville: req.body.shipping.ville
+      },
+      // Ajout de l'ID de session dans l'URL de succès pour pouvoir l'identifier
+      success_url: `https://faithson.fr/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://faithson.fr/checkout`,
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // 404
 app.use((req, res) => res.status(404).json({ error: 'Ressource introuvable.' }))
 
