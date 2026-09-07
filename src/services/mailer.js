@@ -39,7 +39,11 @@ export async function sendContactMail({ nom, email, message }) {
     })
 }
 
-export async function sendQuoteMail({ produit, quantite, technique, message, email }) {
+export async function sendQuoteMail({ produit, quantite, technique, message, email, fichierUrl }) {
+    const fichierLine = fichierUrl
+        ? `<p><strong>Fichier joint :</strong> <a href="https://faithson.fr${fichierUrl}">Voir le fichier</a></p>`
+        : '<p><strong>Fichier joint :</strong> aucun</p>'
+
     await transporter.sendMail({
         from:    `"Faithson Custom" <${config.mail.from}>`,
         to:      config.mail.to,
@@ -48,11 +52,12 @@ export async function sendQuoteMail({ produit, quantite, technique, message, ema
         html: `
       <h2>Nouvelle demande de devis</h2>
       <p><strong>Produit :</strong> ${produit}</p>
-      <p><strong>Quantité :</strong> ${quantite}</p>
-      <p><strong>Technique :</strong> ${technique}</p>
+      <p><strong>Quantité :</strong> ${quantite || '—'}</p>
+      <p><strong>Technique :</strong> ${technique || '—'}</p>
       <p><strong>Email :</strong> ${email || '—'}</p>
+      ${fichierLine}
       <p><strong>Message :</strong></p>
-      <p>${(message || '').replace(/\n/g, '<br>')}</p>
+      <p>${(message || '—').replace(/\n/g, '<br>')}</p>
     `
     })
 }

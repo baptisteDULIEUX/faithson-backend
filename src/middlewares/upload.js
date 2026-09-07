@@ -2,31 +2,51 @@ import multer from 'multer'
 import path from 'node:path'
 import fs from 'node:fs'
 
-// Crée le dossier si il n'existe pas
-const uploadDir = 'uploads/products'
-fs.mkdirSync(uploadDir, { recursive: true })
+// Dossier images produits
+const productUploadDir = 'uploads/products'
+fs.mkdirSync(productUploadDir, { recursive: true })
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLowerCase()
-        const name = `product-${req.params.id}-${Date.now()}${ext}`
-        cb(null, name)
-    }
-})
+// Dossier fichiers devis (logos clients)
+const quoteUploadDir = 'uploads/quotes'
+fs.mkdirSync(quoteUploadDir, { recursive: true })
+
+const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.svg', '.pdf', '.ai']
 
 const fileFilter = (req, file, cb) => {
-    const allowed = ['.jpg', '.jpeg', '.png', '.webp']
     const ext = path.extname(file.originalname).toLowerCase()
-    if (allowed.includes(ext)) {
+    if (allowedExts.includes(ext)) {
         cb(null, true)
     } else {
-        cb(new Error('Format non supporté. Utilisez JPG, PNG ou WebP.'))
+        cb(new Error('Format non supporté.'))
     }
 }
 
+// Upload image produit
+const productStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, productUploadDir),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase()
+        cb(null, `product-${req.params.id}-${Date.now()}${ext}`)
+    }
+})
+
+// Upload fichier devis
+const quoteStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, quoteUploadDir),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase()
+        cb(null, `quote-${Date.now()}${ext}`)
+    }
+})
+
 export const uploadImage = multer({
-    storage,
+    storage: productStorage,
     fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5 Mo max
+    limits: { fileSize: 5 * 1024 * 1024 }
+})
+
+export const uploadQuoteFile = multer({
+    storage: quoteStorage,
+    fileFilter,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10 Mo pour les fichiers vectoriels
 })
