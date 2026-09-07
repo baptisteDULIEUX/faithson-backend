@@ -50,3 +50,21 @@ export const uploadQuoteFile = multer({
     fileFilter,
     limits: { fileSize: 10 * 1024 * 1024 } // 10 Mo pour les fichiers vectoriels
 })
+
+// Dossier logos personnalisation
+const customUploadDir = 'uploads/custom'
+fs.mkdirSync(customUploadDir, { recursive: true })
+
+const customStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, customUploadDir),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase()
+        cb(null, `custom-${Date.now()}${ext}`)
+    }
+})
+
+export const uploadCustomLogo = multer({
+    storage: customStorage,
+    fileFilter,
+    limits: { fileSize: 10 * 1024 * 1024 }
+})
