@@ -29,13 +29,15 @@ router.post('/quotes', uploadQuoteFile.single('fichier'), wrap(async (req, res) 
     // Stockage en base
     const { rows } = await query(
         `INSERT INTO quotes (produit, quantite, technique, message, email, fichier)
-     VALUES ($1, $2, $3, $4, $5, $6)
-     RETURNING id`,
+         VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING id`,
         [produit, quantite || null, technique || null, message || null, email || null, fichierUrl]
     )
 
-    // Envoi mail
-    await sendQuoteMail({ produit, quantite, technique, message, email, fichierUrl })
+    // Envoi mail (non bloquant — ne fait pas échouer la requête si le mail plante)
+    sendQuoteMail({ produit, quantite, technique, message, email, fichierUrl }).catch((err) => {
+        console.warn('Mail non envoyé :', err.message)
+    })
 
     res.json({ ok: true, quoteId: `DEVIS-${rows[0].id}` })
 }))
