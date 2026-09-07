@@ -3,6 +3,7 @@ import cors from 'cors'
 import { config } from './config.js'
 import productsRouter from './routes/products.routes.js'
 import Stripe from 'stripe'
+import ordersRouter from './routes/orders.routes.js'
 
 import formsRouter from './routes/forms.routes.js'
 import {verifyMailer} from "./services/mailer.js"
@@ -30,6 +31,8 @@ app.get('/api/health', (req, res) => res.json({ ok: true, service: 'faithson-bac
 app.use('/api', productsRouter)
 
 app.use('/api', formsRouter)
+
+app.use('/api', ordersRouter)
 
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
