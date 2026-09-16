@@ -14,7 +14,8 @@ function toApi(row) {
     priceLabel: price === null ? 'sur' : 'à partir de',
     badge: row.badge,
     image: row.image,
-    placeholder: { shape: row.placeholder_shape, color: row.placeholder_color }
+    placeholder: { shape: row.placeholder_shape, color: row.placeholder_color },
+    sizes: row.sizes || ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
   }
 }
 
@@ -56,6 +57,7 @@ export async function findById(id) {
 export async function create(data) {
   // id unique dérivé du nom (ou de l'id fourni)
   const base = slugify(data.id || data.name || 'produit') || 'produit'
+  const sizes = data.sizes || ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
   let id = base
   let n = 2
   while (await idExists(id)) id = `${base}-${n++}`
@@ -77,7 +79,8 @@ export async function create(data) {
       data.badge || null,
       data.image || null,
       ph.shape || 'tshirt',
-      ph.color || '#3a2e27'
+      ph.color || '#3a2e27',
+      sizes
     ]
   )
   return toApi(rows[0])
@@ -108,6 +111,10 @@ export async function update(id, patch) {
       fields.push(`placeholder_color = $${i++}`)
       values.push(patch.placeholder.color)
     }
+  }
+  if (patch.sizes !== undefined) {
+    fields.push(`sizes = $${i++}`)
+    values.push(patch.sizes)
   }
 
   if (fields.length === 0) return findById(id) // rien à modifier
