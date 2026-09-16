@@ -55,33 +55,32 @@ export async function findById(id) {
 }
 
 export async function create(data) {
-  // id unique dérivé du nom (ou de l'id fourni)
   const base = slugify(data.id || data.name || 'produit') || 'produit'
-  const sizes = data.sizes || ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
   let id = base
   let n = 2
   while (await idExists(id)) id = `${base}-${n++}`
 
   const ph = data.placeholder || {}
   const price = data.price === undefined ? null : data.price
+  const sizes = data.sizes || ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
 
   const { rows } = await query(
-    `INSERT INTO products
-       (id, name, technique, category_key, price, badge, image, placeholder_shape, placeholder_color)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-     RETURNING *`,
-    [
-      id,
-      data.name || 'Nouveau produit',
-      data.technique || 'sérigraphie',
-      data.category || 'hauts',
-      price,
-      data.badge || null,
-      data.image || null,
-      ph.shape || 'tshirt',
-      ph.color || '#3a2e27',
-      sizes
-    ]
+      `INSERT INTO products
+       (id, name, technique, category_key, price, badge, image, placeholder_shape, placeholder_color, sizes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING *`,
+      [
+        id,
+        data.name || 'Nouveau produit',
+        data.technique || 'flocage',
+        data.category || 'hauts',
+        price,
+        data.badge || null,
+        data.image || null,
+        ph.shape || 'tshirt',
+        ph.color || '#3a2e27',
+        sizes
+      ]
   )
   return toApi(rows[0])
 }
