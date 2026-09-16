@@ -11,6 +11,8 @@ import {verifyMailer} from "./services/mailer.js"
 
 import stocksRouter from './routes/stocks.routes.js'
 
+import productImagesRouter from './routes/productImages.routes.js'
+
 const app = express()
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 // CORS : autorise le frontend (origine(s) définie(s) dans .env)
@@ -40,6 +42,8 @@ app.use('/api', ordersRouter)
 app.use('/api', customRouter)
 
 app.use('/api', stocksRouter)
+
+app.use('/api', productImagesRouter)
 
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
